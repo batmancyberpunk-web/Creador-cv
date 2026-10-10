@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: blob:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Creador de CV gratis y privado</title>
+
+<style>
+    * { box-sizing: border-box; }
+:root {
+  --azul: #1d4f86;
+  --fondo: #eef2f7;
+  --tinta: #16212e;
+  --gris: #5b6b7c;
+  --borde: #b9c5d3;
+}
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  background: var(--fondo);
+  color: var(--tinta);
+ line-height: 1.5;
+}
+.barra { background: #fff; border-bottom: 1px solid #d8e0ea; padding: 12px 24px; }
+.barra h1 { margin: 0; font-size: 1.3rem; }
+.barra p { margin: 0; color: var(--gris); font-size: 0.9rem; }
+.app { display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; align-items: flex-start; }
+.panel { flex: 1 1 340px; max-width: 460px; }
+#vista { flex: 2 1 420px; max-width: none; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+details { background: #fff; border: 1px solid #d8e0ea; border-radius: 8px; margin: 10px 0; padding: 0 14px 12px; }
+summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }
+label { display: block; font-size: 0.9rem; font-weight: 500; margin-top: 10px; }
+input[type=text], input[type=email], input[type=tel], select, textarea {
+  width: 100%; min-height: 44px; padding: 8px 10px;
+  border: 1px solid var(--borde); border-radius: 8px;
+  font: inherit; background: #fff;
+}
+textarea { resize: vertical; }
+button {
+  min-height: 44px; padding: 0 14px; margin: 8px 8px 0 0;
+  border: 1px solid var(--borde); border-radius: 8px;
+  background: #fff; font: inherit; cursor: pointer;
+}
+button.principal { background: var(--azul); border-color: var(--azul); color: #fff; }
+button.peligro { color: #a02020; }
+.item { border-top: 1px solid #e1e7ee; padding: 6px 0 4px; }
+.fila-orden { display: flex; align-items: center; gap: 6px; border-top: 1px solid #e1e7ee; padding: 4px 0; }
+.fila-orden label { flex: 1; margin: 0; }
+.fila-orden button { margin: 0; }
+.nota { font-size: 0.85rem; color: var(--gris); margin: 4px 0; }
+.aviso { min-height: 1.4em; color: #0f5132; font-weight: 500; margin: 0 0 6px; }
+:focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+.controles { width: 100%; max-width: 816px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.controles label { margin: 0; }
+.controles select { width: auto; }
+.controles .nota { width: 100%; }
+#muestras { display: flex; gap: 6px; align-items: center; }
+.muestra { width: 36px; min-height: 36px; padding: 0; margin: 0; border-radius: 50%; border: 3px solid #fff; }
+.muestra[aria-pressed="true"] { border-color: var(--tinta); }
+
+#cv {
+      width: 100%; max-width: 816px; min-height: 1000px;
+  background: #fff; border: 1px solid #d8e0ea; padding: 44px;
+  color: #16212e; font-size: 14px; line-height: 1.5;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+#cv[data-fuente="serif"] { font-family: Georgia, "Times New Roman", serif; }
+#cv[data-papel="a4"] { max-width: 794px; }
+#cv p { margin: 0; }
+#cv ul { margin: 4px 0 0; padding-left: 18px; }
+.cv-cab { display: flex; gap: 18px; align-items: center; margin-bottom: 14px; }
+.cv-foto { width: 96px; height: 96px; object-fit: cover; border-radius: 50%; }
+.cv-nombre { margin: 0; font-size: 28px; line-height: 1.2; color: var(--color); }
+.cv-titular { margin-top: 2px; font-size: 16px; }
+.cv-contacto { margin-top: 6px; color: #4a5866; font-size: 13px; }
+.cv-cuerpo { display: flex; flex-direction: column; }
+.cv-lateral { order: 2; }
+.cv-sec { margin-top: 14px; }
+.cv-tit { margin: 0 0 6px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color); }
+.cv-item { margin-bottom: 10px; break-inside: avoid; }
+.cv-item-cab { display: flex; justify-content: space-between; gap: 12px; }
+.cv-fechas { color: #4a5866; white-space: nowrap; }
+.t-clasica .cv-cab { border-bottom: 2px solid var(--color); padding-bottom: 14px; }
+.t-clasica .cv-tit { border-bottom: 1px solid #d3dbe5; padding-bottom: 3px; }
+.t-moderna .cv-cuerpo { flex-direction: row; gap: 22px; }
+.t-moderna .cv-lateral { order: 0; width: 32%; align-self: flex-start; background: var(--color); color: #fff; padding: 4px 16px 16px; border-radius: 6px; }
+.t-moderna .cv-lateral .cv-tit, .t-moderna .cv-lateral .cv-fechas { color: #fff; }
+.t-moderna .cv-principal { flex: 1; }
+.t-minimalista .cv-nombre { font-weight: 400; letter-spacing: 0.04em; color: #16212e; }
+.t-minimalista .cv-tit { color: #16212e; font-weight: 400; letter-spacing: 0.14em; border-top: 1px solid var(--borde); padding-top: 8px; }
+.t-creativa .cv-cab { background: var(--color); color: #fff; margin: -44px -44px 18px; padding: 28px 44px; }
+.t-creativa .cv-nombre, .t-creativa .cv-contacto { color: #fff; }
+.t-creativa .cv-tit { display: inline-block; border-bottom: 3px solid var(--color); }
+@media (max-width: 700px) {
+  .app { padding: 12px; }
+  #cv { padding: 20px; }
+  .t-creativa .cv-cab { margin: -20px -20px 14px; padding: 20px; }
+  .t-moderna .cv-cuerpo { flex-direction: column; }
+  .t-moderna .cv-lateral { width: auto; }
+}
+@media print {  
+  body { background: #fff; }
+  .barra, #editor, .controles { display: none !important; }
+  .app { display: block; padding: 0; }
+  #vista { display: block; }
+  #cv { border: 0; max-width: none; min-height: 0; padding: 0; }
+  .t-creativa .cv-cab { margin: 0 0 18px; padding: 22px; }
+}
+
+/* ==========================================================================
+   PLANTILLA ELEGANTE (Tu Turno) - Diseño Estilizado con Marcos Profesionales
+   ========================================================================== */
+
+/* 1. Contenedor principal del CV */
+#cv[data-plantilla="elegante"] {
+    border: 3px double var(--color); /* Marco perimetral clásico de doble línea */
+    padding: 50px 40px;
+    background-color: #fff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Sombra suave para darle volumen */
+}
+
+/* 2. Encabezado elegante (Nombre y profesión) */
+#cv[data-plantilla="elegante"] .cv-nombre {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    text-align: center;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+#cv[data-plantilla="elegante"] .cv-titular {
+    text-align: center;
+    font-style: italic;
+    color: #4a5568;
+    margin-bottom: 15px;
+}
+
+#cv[data-plantilla="elegante"] .cv-contacto {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 15px;
+    font-size: 12px;
+}
+
+/* 3. Títulos de las secciones con tratamiento distinguido */
+#cv[data-plantilla="elegante"] .cv-tit {
+    text-align: center;
+    font-family: Georgia, serif;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border-top: 1px solid var(--color);
+    border-bottom: 1px solid var(--color);
+    padding: 6px 0;
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+/* 4. Bloques de experiencia y estudios */
+#cv[data-plantilla="elegante"] .cv-item-cab strong {
+    font-family: Georgia, serif;
+    font-size: 15px;
+}
+
+#cv[data-plantilla="elegante"] .cv-fechas {
+    font-style: italic;
+    font-weight: 500;
+    color: #4a5568;
+}
+</style>
+<style id="pagina"></style>
+</head>
+
+<body>
+<header class="barra">
+  <h1>Creador de CV</h1>
+  <p>Gratis, sin registro. Lo que escribes se queda en tu dispositivo.</p>
+</header>
+<main class="app">
+<section id="editor" class="panel" aria-label="Editor del currículum">
+  <p id="aviso" class="aviso" role="status"></p>
+  <button type="button" id="b-ejemplo">Cargar datos de ejemplo</button>
+  <label><input type="checkbox" data-campo="opciones.sinExperiencia"> Aún no tengo experiencia laboral (pone primero estudios y proyectos)</label>
+  <details open>
+    <summary>1. Tus datos</summary>
+    <p class="nota">Solo el nombre es necesario. No pongas tu dirección completa, tu número de documento ni otros datos sensibles.</p>
+    <label for="d-nombre">Nombre completo</label>
+    <input type="text" id="d-nombre" data-campo="datos.nombre" maxlength="120" autocomplete="name">
+    <label for="d-titular">Titular (a qué te dedicas o puesto que buscas)</label>
+    <input type="text" id="d-titular" data-campo="datos.titular" maxlength="120" autocomplete="off">
+    <label for="d-email">Correo electrónico</label>
+    <input type="email" id="d-email" data-campo="datos.email" maxlength="120" autocomplete="email">
+    <label for="d-tel">Teléfono (opcional)</label>
+    <input type="tel" id="d-tel" data-campo="datos.telefono" maxlength="120" autocomplete="tel">
+    <label for="d-ubic">Ciudad y país</label>
+    <input type="text" id="d-ubic" data-campo="datos.ubicacion" maxlength="120" autocomplete="off">
+    <label for="d-enlace">Enlace profesional (opcional)</label>
+    <input type="text" id="d-enlace" data-campo="datos.enlace" maxlength="120" autocomplete="off">
+    <label for="d-disponibilidad">Disponibilidad</label>
+    <input type="text" id="d-disponibilidad" data-campo="datos.disponibilidad" maxlength="120" autocomplete="off">
+  </details>
+  <details>
+    <summary>2. Fotografía (opcional)</summary>
+    <p class="nota">Es común en muchos países de Latinoamérica y Europa; en otros, como Estados Unidos, no se recomienda. Usa una foto de rostro, con fondo neutro. Se recorta en cuadrado y se queda en tu dispositivo.</p>
+    <label for="f-foto">Elegir imagen</label>
+    <input type="file" id="f-foto" accept="image/jpeg,image/png,image/webp">
+    <button type="button" id="b-quitarfoto">Quitar foto</button>
+    <label><input type="checkbox" data-campo="opciones.mostrarFoto"> Mostrar la foto en el CV</label>
+  </details>
+  <details>
+    <summary>3. Resumen</summary>
+    <p class="nota">De 2 a 4 líneas: quién eres, qué sabes hacer y qué buscas.</p>
+    <label for="r-res">Resumen profesional</label>
+    <textarea id="r-res" data-campo="resumen" rows="4" maxlength="800"></textarea>
+    <p class="nota" id="cuenta"></p>
+  </details>
+  <details>
+    <summary>4. Experiencia laboral</summary>
+    <p class="nota">Del trabajo más reciente al más antiguo. Incluye prácticas, trabajos temporales y por cuenta propia.</p>
+    <div id="items-experiencia"></div>
+    <button type="button" data-agregar="experiencia">+ Agregar experiencia</button>
+  </details>
+  <details>
+    <summary>5. Estudios</summary>
+    <p class="nota">Incluye estudios en curso o incompletos. Pon lo más reciente primero.</p>
+
+      <div id="items-estudios"></div>
+    <button type="button" data-agregar="estudios">+ Agregar estudios</button>
+  </details>
+  <details>
+    <summary>6. Proyectos y voluntariado</summary>
+    <p class="nota">Ideal si estás empezando: trabajos de clase, proyectos propios, voluntariado o actividades.</p>
+    <div id="items-proyectos"></div>
+    <button type="button" data-agregar="proyectos">+ Agregar proyecto</button>
+  </details>
+  <details>
+    <summary>7. Cursos y certificaciones</summary>
+    <div id="items-cursos"></div>
+    <button type="button" data-agregar="cursos">+ Agregar curso</button>
+  </details>
+  <details>
+    <summary>8. Habilidades e idiomas</summary>
+    <label for="h-hab">Habilidades (separa con comas o saltos de línea)</label>
+    <textarea id="h-hab" data-campo="habilidades" rows="3" maxlength="600"></textarea>
+    <label for="h-idi">Idiomas (uno por línea, ej.: Inglés - intermedio)</label>
+    <textarea id="h-idi" data-campo="idiomas" rows="2" maxlength="300"></textarea>
+  </details>
+  <details>
+    <summary>9. Orden y secciones visibles</summary>
+    <p class="nota">Elige qué secciones mostrar y en qué orden. Las secciones sin información no aparecen solas.</p>
+    <div id="orden"></div>
+  </details>
+  <details>
+    <summary>Privacidad y tus datos</summary>
+    <p class="nota">Esta página no envía lo que escribes a ningún servidor: todo ocurre en tu navegador.</p>
+    <label><input type="checkbox" data-campo="opciones.guardar"> Recordar mis datos en este dispositivo (no lo uses en computadoras compartidas)</label>
+    <button type="button" id="b-exportar">Descargar mis datos (.json)</button>
+    <button type="button" id="b-importar">Cargar datos descargados</button>
+    <input type="file" id="f-importar" accept="application/json" hidden>
+    <button type="button" id="b-borrar" class="peligro">Borrar todos mis datos</button>
+  </details>
+
+  <details>
+  <summary>🔒 Aviso de privacidad y seguridad</summary>
+  <p class="nota"><strong>Tu privacidad es absoluta:</strong> Esta aplicación no cuenta con servidores ni base de datos externas. Toda la información que ingresas, incluyendo tu fotografía y datos de contacto, se procesa de forma local y exclusiva dentro de tu navegador web. Nada se transmite por internet ni es visible para terceros.</p>
+</details>
+
+</section>
+<section id="vista" class="panel" aria-label="Vista previa">
+  <div class="controles">
+    <label>Plantilla
+      <select id="o-plantilla" data-campo="opciones.plantilla">
+        <option value="clasica">Clásica</option>
+        <option value="moderna">Moderna</option>
+        <option value="minimalista">Minimalista</option>
+        <option value="creativa">Creativa</option>
+        <option value="elegante">Elegante</option>
+      </select>
+    </label>
+    <label>Letra
+      <select id="o-fuente" data-campo="opciones.fuente">
+        <option value="sans">Moderna</option>
+        <option value="serif">Clásica</option>
+      </select>
+    </label>
+    <label>Papel
+      <select id="o-papel" data-campo="opciones.papel">
+        <option value="carta">Carta</option>
+        <option value="a4">A4</option>
+
+              </select>
+    </label>
+    <div id="muestras" role="group" aria-label="Color principal"></div>
+    <button type="button" id="b-imprimir" class="principal">Guardar como PDF</button>
+    <p class="nota">En la ventana que se abre, elige "Guardar como PDF" y desactiva "Encabezados y pies de página".</p>
+  </div>
+  <article id="cv" aria-label="Vista previa del currículum"></article>
+</section>
+</main>
+
+<script>
+    "use strict";
+// 1. Datos de la aplicación
+const CLAVE = "cv-datos-v1";
+const COLORES = ["#1d4f86", "#0f766e", "#7a2e6e", "#2b3440", "#8a1c2b"];
+const NOMBRES_COLOR = ["Azul", "Verde azulado", "Ciruela", "Grafito", "Vino"];
+const PLANTILLAS = ["clasica", "moderna", "minimalista", "creativa", "elegante"];
+// Secciones del CV y su orden
+const NOMBRES_SECCION = {
+  resumen: "Resumen", experiencia: "Experiencia laboral", estudios: "Estudios",
+  proyectos: "Proyectos y voluntariado", cursos: "Cursos y certificaciones",
+  habilidades: "Habilidades", idiomas: "Idiomas",
+};
+const ORDEN_NORMAL = ["resumen", "experiencia", "estudios", "proyectos", "cursos", "habilidades", "idiomas"];
+const ORDEN_PRINCIPIANTE = ["resumen", "estudios", "proyectos", "experiencia", "cursos", "habilidades", "idiomas"];
+const LATERALES = ["cursos", "habilidades", "idiomas"];   // van a la barra lateral en la plantilla Moderna
+// Cada lista: [clave, etiqueta, esLargo]
+const LISTAS = {
+  experiencia: { campos: [
+    ["cargo", "Puesto o rol"], ["lugar", "Empresa o lugar"],
+    ["desde", "Desde (ej.: Mar 2023)"], ["hasta", "Hasta (o Actualidad)"],
+        ["detalle", "Qué hiciste y lograste (una idea por línea)", true]] },
+  estudios: { campos: [
+    ["cargo", "Título o programa"], ["lugar", "Institución"],
+    ["desde", "Desde"], ["hasta", "Hasta (o En curso)"],
+    ["detalle", "Detalles opcionales (una idea por línea)", true]] },
+  proyectos: { campos: [
+    ["cargo", "Nombre o rol"], ["lugar", "Dónde o con quién"],
+    ["desde", "Desde"], ["hasta", "Hasta"],
+    ["detalle", "Qué hiciste (una idea por línea)", true]] },
+  cursos: { campos: [
+    ["cargo", "Nombre del curso"], ["lugar", "Institución"], ["desde", "Año"]] },
+};
+function estadoInicial() {
+  return {
+    datos: { nombre: "", titular: "", email: "", telefono: "", ubicacion: "", enlace: "" },
+    resumen: "",
+    foto: "",
+    listas: { experiencia: [], estudios: [], proyectos: [], cursos: [] },
+    habilidades: "",
+    idiomas: "",
+    orden: [...ORDEN_NORMAL],
+    ocultas: [],
+    opciones: {
+      plantilla: "clasica", color: COLORES[0], fuente: "sans", papel: "carta",
+      mostrarFoto: true, sinExperiencia: false, guardar: false,
+    },
+  };
+}
+let estado = estadoInicial();
+// Herramientas pequeñas. Todo el texto del usuario entra con textContent, nunca con innerHTML.
+function el(etiqueta, clase, texto) {
+  const e = document.createElement(etiqueta);
+  if (clase) e.className = clase;
+  if (texto !== undefined && texto !== null) e.textContent = texto;
+  return e;
+}
+function lineas(texto) {
+  return texto.split("\n").map((s) => s.trim()).filter(Boolean);
+}
+function recortar(valor, max) {
+  return typeof valor === "string" ? valor.slice(0, max) : "";
+};
+// 2. Dibujar el currículum a partir de los datos
+function seccion(titulo, nodos) {
+  const s = el("section", "cv-sec");
+  s.append(el("h3", "cv-tit", titulo), ...nodos);
+  return s;
+}
+function bloquesItems(lista) {
+  return estado.listas[lista]
+    .filter((i) => (i.cargo || "").trim() || (i.lugar || "").trim())
+    .map((i) => {
+      const b = el("div", "cv-item");
+      const cab = el("div", "cv-item-cab");
+      const titulo = [i.cargo, i.lugar].map((s) => (s || "").trim()).filter(Boolean).join(" · ");
+      cab.append(el("strong", null, titulo));
+      const fechas = [i.desde, i.hasta].map((s) => (s || "").trim()).filter(Boolean).join(" – ");
+      if (fechas) cab.append(el("span", "cv-fechas", fechas));
+      b.append(cab);
+      const puntos = lineas(i.detalle || "");
+      if (puntos.length) {
+        const ul = el("ul");
+        puntos.forEach((p) => ul.append(el("li", null, p)));
+        b.append(ul);
+      }
+      return b;
+    });
+}
+function seccionLista(titulo, lista) {
+  const nodos = bloquesItems(lista);
+  return nodos.length ? seccion(titulo, nodos) : null;
+}
+// Cada sección sabe dibujarse; si no tiene información, devuelve null
+const CONSTRUCTORES = {
+  resumen: () => {
+    const t = estado.resumen.trim();
+    return t ? seccion(NOMBRES_SECCION.resumen, [el("p", null, t)]) : null;
+  },
+  experiencia: () => seccionLista(NOMBRES_SECCION.experiencia, "experiencia"),
+  estudios: () => seccionLista(NOMBRES_SECCION.estudios, "estudios"),
+  proyectos: () => seccionLista(NOMBRES_SECCION.proyectos, "proyectos"),
+  cursos: () => seccionLista(NOMBRES_SECCION.cursos, "cursos"),
+  habilidades: () => {
+    const h = lineas(estado.habilidades.replace(/,/g, "\n"));
+    return h.length ? seccion(NOMBRES_SECCION.habilidades, [el("p", null, h.join(" · "))]) : null;
+  },
+  idiomas: () => {
+    const i = lineas(estado.idiomas);
+    return i.length ? seccion(NOMBRES_SECCION.idiomas, [el("p", null, i.join(" · "))]) : null;
+  },
+};
+function renderCV() {
+  const cv = document.getElementById("cv");
+  const o = estado.opciones;
+   const d = estado.datos;
+  cv.className = "t-" + o.plantilla;
+  cv.style.setProperty("--color", o.color);
+  cv.dataset.fuente = o.fuente;
+  const cab = el("header", "cv-cab");
+  if (estado.foto && o.mostrarFoto) {
+    const img = el("img", "cv-foto");
+    img.src = estado.foto;
+    img.alt = "Fotografía de perfil";
+    cab.append(img);
+  }
+  const id = el("div", "cv-id");
+  id.append(el("h2", "cv-nombre", d.nombre || "Tu nombre"));
+  if (d.titular) id.append(el("p", "cv-titular", d.titular));
+  const contacto = [d.email, d.telefono, d.ubicacion, d.enlace].filter(Boolean).join(" · ");
+  if (contacto) id.append(el("p", "cv-contacto", contacto));
+  cab.append(id);
+  const principal = el("div", "cv-principal");
+  const lateral = el("div", "cv-lateral");
+  const dosColumnas = o.plantilla === "moderna";
+  estado.orden.forEach((id) => {
+    if (estado.ocultas.includes(id)) return;       // la persona la ocultó
+    const nodo = CONSTRUCTORES[id]();
+    if (!nodo) return;                             // sin información: no aparece
+    (dosColumnas && LATERALES.includes(id) ? lateral : principal).append(nodo);
+  });
+  const cuerpo = el("div", "cv-cuerpo");
+  cuerpo.append(principal, lateral);
+  cv.replaceChildren(cab, cuerpo);
+}
+// 3. El formulario: leer y escribir datos, listas dinámicas
+function leer(ruta) { return ruta.split(".").reduce((o, k) => o[k], estado); }
+function fijar(ruta, valor) {
+  const partes = ruta.split(".");
+  const ultimo = partes.pop();
+  partes.reduce((o, k) => o[k], estado)[ultimo] = valor;
+}
+function avisar(mensaje) { document.getElementById("aviso").textContent = mensaje; }
+function conectarCampos() {
+  document.querySelectorAll("[data-campo]").forEach((c) => {
+    c.addEventListener("input", () => {
+      fijar(c.dataset.campo, c.type === "checkbox" ? c.checked : c.value);
+      if (c.dataset.campo === "opciones.sinExperiencia") {
+        estado.orden = [...(c.checked ? ORDEN_PRINCIPIANTE : ORDEN_NORMAL)];
+        dibujarOrden();
+        avisar("Se reordenaron las secciones. Puedes ajustarlas en 'Orden y secciones visibles'.");
+      }
+      actualizar();
+    });
+  });
+}
+function sincronizarFormulario() {
+  document.querySelectorAll("[data-campo]").forEach((c) => {
+    const v = leer(c.dataset.campo);
+    if (c.type === "checkbox") c.checked = v; else c.value = v;
+  });
+  dibujarListas();
+  dibujarOrden();
+  marcarMuestras();
+}
+function crearItem(lista, idx) {
+  const datos = estado.listas[lista][idx];
+  const caja = el("div", "item");
+  LISTAS[lista].campos.forEach(([clave, etiqueta, largo]) => {
+    const id = lista + "-" + idx + "-" + clave;
+    const lab = el("label", null, etiqueta);
+    lab.htmlFor = id;
+    const campo = document.createElement(largo ? "textarea" : "input");
+     campo.id = id;
+    if (largo) campo.rows = 3; else campo.type = "text";
+    campo.maxLength = largo ? 800 : 120;
+    campo.value = datos[clave] || "";
+    campo.addEventListener("input", () => { datos[clave] = campo.value; actualizar(); });
+    caja.append(lab, campo);
+  });
+  const quitar = el("button", "peligro", "Quitar");
+  quitar.type = "button";
+  quitar.addEventListener("click", () => {
+    estado.listas[lista].splice(idx, 1);
+    dibujarListas();
+    actualizar();
+  });
+  caja.append(quitar);
+  return caja;
+}
+function dibujarListas() {
+  Object.keys(LISTAS).forEach((lista) => {
+    const caja = document.getElementById("items-" + lista);
+    caja.replaceChildren(...estado.listas[lista].map((_, i) => crearItem(lista, i)));
+  });
+}
+function botonOrden(clase, texto, etiqueta, accion) {
+  const b = el("button", clase, texto);
+  b.type = "button";
+  b.setAttribute("aria-label", etiqueta);
+  b.addEventListener("click", accion);
+  return b;
+}
+function mover(i, delta) {
+  const j = i + delta;
+  if (j < 0 || j >= estado.orden.length) return;
+  const o = estado.orden;
+  [o[i], o[j]] = [o[j], o[i]];
+  dibujarOrden();
+  actualizar();
+  const fila = document.getElementById("orden").children[j];
+  fila.querySelector(delta < 0 ? ".sube" : ".baja").focus();
+}
+function dibujarOrden() {
+  const caja = document.getElementById("orden");
+  caja.replaceChildren(...estado.orden.map((id, i) => {
+    const nombre = NOMBRES_SECCION[id];
+    const fila = el("div", "fila-orden");
+    const etiqueta = el("label");
+    const casilla = document.createElement("input");
+    casilla.type = "checkbox";
+    casilla.checked = !estado.ocultas.includes(id);
+    casilla.addEventListener("input", () => {
+      estado.ocultas = casilla.checked
+        ? estado.ocultas.filter((x) => x !== id)
+        : [...estado.ocultas, id];
+      actualizar();
+    });
+    etiqueta.append(casilla, " " + nombre);
+    fila.append(
+      etiqueta,
+           botonOrden("sube", "Subir", "Subir " + nombre, () => mover(i, -1)),
+      botonOrden("baja", "Bajar", "Bajar " + nombre, () => mover(i, 1))
+    );
+    return fila;
+  }));
+}
+function conectarAgregar() {
+  document.querySelectorAll("[data-agregar]").forEach((b) => {
+    b.addEventListener("click", () => {
+      const lista = b.dataset.agregar;
+      if (estado.listas[lista].length >= 15) { avisar("Máximo 15 elementos por sección."); return; }
+      estado.listas[lista].push({});
+      dibujarListas();
+      const caja = document.getElementById("items-" + lista);
+      caja.lastElementChild.querySelector("input").focus();
+      actualizar();
+    });
+  });
+}
+function contador() {
+  document.getElementById("cuenta").textContent = estado.resumen.length + " de 800 caracteres";
+}
+// PROVISIONAL (Día 2): se reemplaza en el Día 4
+function marcarMuestras() {}
+function aplicarPagina() {}
+function quitarLocal() {}
+function guardarLocal() {}
+function actualizar() { renderCV(); contador(); }
+
+// 4. Fotografía: se recorta y se vuelve a codificar en el navegador
+function procesarFoto(archivo) {
+  if (!archivo) return;
+  if (!["image/jpeg", "image/png", "image/webp"].includes(archivo.type)) {
+    avisar("Elige una imagen JPG, PNG o WebP.");
+    return;
+  }
+  if (archivo.size > 8 * 1024 * 1024) {
+    avisar("La imagen pesa más de 8 MB. Elige una más pequeña.");
+    return;
+  }
+  const url = URL.createObjectURL(archivo);
+  const img = new Image();
+  img.onload = () => {
+    const lado = Math.min(img.width, img.height);
+    const sx = (img.width - lado) / 2;
+    const sy = (img.height - lado) / 2;
+    const lienzo = document.createElement("canvas");
+    lienzo.width = 400;
+    lienzo.height = 400;
+    lienzo.getContext("2d").drawImage(img, sx, sy, lado, lado, 0, 0, 400, 400);
+    estado.foto = lienzo.toDataURL("image/jpeg", 0.85);
+    URL.revokeObjectURL(url);
+    avisar("Foto lista. Se recortó en cuadrado.");
+    actualizar();
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    avisar("No se pudo leer esa imagen.");
+  };
+  img.src = url;
+}
+conectarCampos();
+conectarAgregar();
+sincronizarFormulario();
+actualizar();
+
+// 5. Guardar, exportar, importar y borrar (con validación de todo lo que entra)
+function limpiar(origen) {
+  const base = estadoInicial();
+  if (!origen || typeof origen !== "object") return base;
+  Object.keys(base.datos).forEach((k) => { base.datos[k] = recortar(origen.datos && origen.datos[k], 120); });
+  base.resumen = recortar(origen.resumen, 800);
+  base.habilidades = recortar(origen.habilidades, 600);
+  base.idiomas = recortar(origen.idiomas, 300);
+  if (typeof origen.foto === "string" && origen.foto.length < 400000 &&
+      /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(origen.foto)) {
+    base.foto = origen.foto;
+  }
+  Object.keys(LISTAS).forEach((l) => {
+    const arr = origen.listas && Array.isArray(origen.listas[l]) ? origen.listas[l].slice(0, 15) : [];
+    base.listas[l] = arr.map((it) => {
+      const nuevo = {};
+      LISTAS[l].campos.forEach(([clave, , largo]) => { nuevo[clave] = recortar(it && it[clave], largo ? 800 : 120); });
+      return nuevo;
+    });
+  });
+  const orden = Array.isArray(origen.orden) ? origen.orden.filter((id) => ORDEN_NORMAL.includes(id)) : [];
+  const unicos = [...new Set(orden)];
+  ORDEN_NORMAL.forEach((id) => { if (!unicos.includes(id)) unicos.push(id); });
+  base.orden = unicos;
+  base.ocultas = Array.isArray(origen.ocultas)
+    ? [...new Set(origen.ocultas.filter((id) => ORDEN_NORMAL.includes(id)))] : [];
+  const o = origen.opciones || {};
+  if (PLANTILLAS.includes(o.plantilla)) base.opciones.plantilla = o.plantilla;
+  if (COLORES.includes(o.color)) base.opciones.color = o.color;
+  if (["sans", "serif"].includes(o.fuente)) base.opciones.fuente = o.fuente;
+  if (["carta", "a4"].includes(o.papel)) base.opciones.papel = o.papel;
+  base.opciones.mostrarFoto = o.mostrarFoto !== false;
+  base.opciones.sinExperiencia = o.sinExperiencia === true;
+  base.opciones.guardar = o.guardar === true;
+  return base;
+}
+function guardarLocal() {
+  try { localStorage.setItem(CLAVE, JSON.stringify(estado)); }
+  catch (e) { avisar("No se pudo guardar en este dispositivo."); }
+}
+function quitarLocal() {
+  try { localStorage.removeItem(CLAVE); } catch (e) { /* sin acceso: no hay nada que borrar */ }
+}
+function cargarLocal() {
+  try {
+    const texto = localStorage.getItem(CLAVE);
+    if (!texto) return false;
+    estado = limpiar(JSON.parse(texto));
+    return true;
+  } catch (e) { return false; }
+}
+function exportar() {
+  const blob = new Blob([JSON.stringify(estado, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "mi-cv-datos.json";
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function importar(archivo) {
+  if (!archivo) return;
+  if (archivo.size > 2 * 1024 * 1024) { avisar("Ese archivo es demasiado grande."); return; }
+  const lector = new FileReader();
+  lector.onload = () => {
+    try {
+      estado = limpiar(JSON.parse(lector.result));
+      sincronizarFormulario();
+      actualizar();
+      avisar("Datos cargados.");
+    } catch (e) { avisar("Ese archivo no es válido."); }
+  };
+  lector.readAsText(archivo);
+}
+function borrarTodo() {
+  if (!confirm("¿Borrar todos tus datos de este dispositivo?")) return;
+  quitarLocal();
+  estado = estadoInicial();
+  sincronizarFormulario();
+  actualizar();
+  avisar("Listo: tus datos se borraron.");
+}
+const EJEMPLO = {
+  datos: { nombre: "Ana Ejemplo", titular: "Asistente administrativa", email: "ana@ejemplo.com",
+           telefono: "+000 0000 0000", ubicacion: "Ciudad, País", enlace: "" },
+  resumen: "Persona organizada y responsable, con experiencia en atención al público y manejo de documentos. Busco un puesto administrativo donde aprender y aportar orden y buen trato.",
+  listas: {
+    experiencia: [{ cargo: "Auxiliar de oficina", lugar: "Empresa de ejemplo", desde: "Mar 2023", hasta: "Actualidad",
+      detalle: "Organicé el archivo de más de 300 documentos\nAtendí llamadas y correos de clientes" }],
+    estudios: [{ cargo: "Bachiller en Ciencias y Letras", lugar: "Instituto de ejemplo", desde: "2019", hasta: "2022", detalle: "" }],
+    proyectos: [{ cargo: "Voluntaria en campaña de reciclaje", lugar: "Comunidad local", desde: "2022", hasta: "2022",
+      detalle: "Coordiné a 10 voluntarios durante un fin de semana" }],
+    cursos: [{ cargo: "Excel básico", lugar: "Curso en línea", desde: "2024" }],
+  },
+  habilidades: "Atención al cliente, Excel básico, Organización, Trabajo en equipo",
+  idiomas: "Español - nativo\nInglés - básico",
+};
+function cargarEjemplo() {
+  const { opciones, orden, ocultas } = estado;   // conserva las preferencias de la persona
+    estado = limpiar(EJEMPLO);
+  Object.assign(estado, { opciones, orden, ocultas });
+  sincronizarFormulario();
+  actualizar();
+  avisar("Datos de ejemplo cargados. Bórralos y escribe los tuyos.");
+}
+
+// 6. Impresión, colores y arranque
+function aplicarPagina() {
+  const papel = estado.opciones.papel === "a4" ? "A4" : "letter";
+  document.getElementById("pagina").textContent = "@page { size: " + papel + "; margin: 12mm; }";
+  document.getElementById("cv").dataset.papel = estado.opciones.papel;
+}
+function crearMuestras() {
+  const caja = document.getElementById("muestras");
+    COLORES.forEach((c, i) => {
+    const b = el("button", "muestra");
+    b.type = "button";
+    b.style.background = c;
+    b.dataset.color = c;
+    b.setAttribute("aria-label", "Color " + NOMBRES_COLOR[i]);
+    b.addEventListener("click", () => {
+      estado.opciones.color = c;
+      marcarMuestras();
+      actualizar();
+    });
+    caja.append(b);
+  });
+}
+function marcarMuestras() {
+  document.querySelectorAll(".muestra").forEach((b) => {
+    b.setAttribute("aria-pressed", String(b.dataset.color === estado.opciones.color));
+  });
+}
+function actualizar() {
+  renderCV();
+  aplicarPagina();
+  contador();
+  if (estado.opciones.guardar) guardarLocal(); else quitarLocal();
+}
+function conectarBotones() {
+  document.getElementById("b-ejemplo").addEventListener("click", cargarEjemplo);
+  document.getElementById("f-foto").addEventListener("change", (e) => procesarFoto(e.target.files[0]));
+  document.getElementById("b-quitarfoto").addEventListener("click", () => {
+    estado.foto = "";
+    document.getElementById("f-foto").value = "";
+    actualizar();
+  });
+  document.getElementById("b-exportar").addEventListener("click", exportar);
+  document.getElementById("b-importar").addEventListener("click", () => document.getElementById("f-importar").click());
+  document.getElementById("f-importar").addEventListener("change", (e) => importar(e.target.files[0]));
+  document.getElementById("b-borrar").addEventListener("click", borrarTodo);
+  document.getElementById("b-imprimir").addEventListener("click", () => window.print());
+}
+function iniciar() {
+  crearMuestras();
+  conectarCampos();
+  conectarAgregar();
+  conectarBotones();
+  if (!cargarLocal()) estado = estadoInicial();
+  sincronizarFormulario();
+  actualizar();
+}
+iniciar();
+
+</script>
+</body>
+</html>
